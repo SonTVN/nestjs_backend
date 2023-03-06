@@ -35,9 +35,9 @@ options:
 substitutions:
   _PLATFORM: managed
   _SERVICE_NAME: nestjs-backend
-  _DEPLOY_REGION: us-central1
+  _DEPLOY_REGION: asia-northeast1
   _GCR_HOSTNAME: us.gcr.io
-  _TRIGGER_ID: a4a9319a-26e8-417c-b537-0fcdfe7a3012
+  _TRIGGER_ID: 8b355163-5deb-43e8-b846-45e5698ec06a
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed
