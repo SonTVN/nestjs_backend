@@ -77,16 +77,20 @@ steps:
       - DATABASE_PASS=$_DATABASE_PASSWORD
     entrypoint:  sh
     args:
-        - /cloudsql/cloud-sql-proxy -instances=$_INSTANCE_CONNECTION_NAME=tcp:3306
+      - '-c'
+      - |
+        /cloudsql/cloud-sql-proxy --unix-socket /cloudsql ${_INSTANCE_CONNECTION_NAME} & sleep 2;
+        if [ $_DATABASE_TYPE = 'mssql' ]; then echo "MSSQL doesn't support Unix Sockets. Skippng."; exit 0; fi;
+        npx prisma migrate deploy
   # Run Migration
-  - id: migration-database
-    name: node:16-alpine
-    dir: backend
-    entrypoint: npx
-    args:
-      - prisma
-      - migrate
-      - deploy
+  # - id: migration-database
+  #   name: node:16-alpine
+  #   dir: backend
+  #   entrypoint: npx
+  #   args:
+  #     - prisma
+  #     - migrate
+  #     - deploy
 images:
   - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
 options:
