@@ -75,11 +75,10 @@ steps:
       - INSTANCE_CONNECTION_NAME=$_INSTANCE_CONNECTION_NAME
       - DATABASE_TYPE=$_DATABASE_TYPE
       - DATABASE_PASS=$_DATABASE_PASSWORD
-    entrypoint: /bin/bash
+    entrypoint: sh
     args:
-      - '-c'
-      - |
-        /cloudsql/cloud-sql-proxy -instances=$_INSTANCE_CONNECTION_NAME=tcp:3306
+      - /cloudsql/cloud-sql-proxy
+      - -instances=$_INSTANCE_CONNECTION_NAME=tcp:3306
   # Run Migration
   - id: migration-database
     name: node:16-alpine
