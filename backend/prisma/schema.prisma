@@ -25,3 +25,8 @@ model Post {
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  Int?
 }
+
+model Comment {
+  id        Int      @default(autoincrement()) @id
+  content   String
+}
