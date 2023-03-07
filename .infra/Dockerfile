@@ -10,6 +10,9 @@ RUN npm install
 # Copy source code
 COPY ./backend /app/
 
+# cat env
+RUN cat .env
+
 # Generate prisma
 RUN npx prisma generate
 
