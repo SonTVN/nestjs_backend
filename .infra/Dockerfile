@@ -4,14 +4,14 @@ RUN mkdir /app
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-# COPY ./backend/package.json ./backend/package-lock.json /app/
-# RUN npm install
+COPY ./backend/package.json ./backend/package-lock.json /app/
+RUN npm install
 
 # Copy source code
 COPY ./backend /app/
 
 # Generate prisma
-# RUN npx prisma generate
+RUN npx prisma generate
 
 # Build production
 RUN npm run build
