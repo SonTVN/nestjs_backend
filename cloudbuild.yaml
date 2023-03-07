@@ -75,7 +75,7 @@ steps:
       - INSTANCE_CONNECTION_NAME=$_INSTANCE_CONNECTION_NAME
       - DATABASE_TYPE=$_DATABASE_TYPE
       - DATABASE_PASS=$_DATABASE_PASSWORD
-    entrypoint: /bin/bash
+    entrypoint: bash
     args:
       - /cloudsql/cloud-sql-proxy
       - -instances=$_INSTANCE_CONNECTION_NAME=tcp:3306
