@@ -1,4 +1,29 @@
 steps:
+  # Install node_modules
+  - name: node:16-alpine
+    dir: backend
+    entrypoint: npm
+    args: 
+      - install
+    id: Install
+  # Generate prisma schema
+  - name: node:16-alpine
+    entrypoint: npx
+    args: 
+      - prisma
+      - generate
+    id: Prisma
+  # Create file .env from evironment variable
+  - name: node:16-alpine
+    dir: backend
+    entrypoint: npm
+    args: 
+      - run
+      - create-env
+    env:
+      - 'DATABASE_URL=$_DATABASE_DRIVER://$_DATABASE_USER:$_DATABASE_PASSWORD@$_DATABASE_HOST:$_DATABASE_PORT/$_DATABASE_NAME'
+    id: Env
+  # Build Image from Dockerfile
   - name: gcr.io/cloud-builders/docker
     args:
       - build
@@ -9,6 +34,7 @@ steps:
       - '-f'
       - .infra/Dockerfile
     id: Build
+  # Push Image to Cloud Registry
   - name: gcr.io/cloud-builders/docker
     args:
       - push
@@ -28,6 +54,15 @@ steps:
       - '--quiet'
     id: Deploy
     entrypoint: gcloud
+  # Run Migration
+  - name: node:16-alpine
+    dir: backend
+    entrypoint: npx
+    args:
+      - prisma
+      - migrate
+      - deploy
+    id: Migration
 images:
   - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
 options:
