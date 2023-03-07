@@ -67,7 +67,7 @@ steps:
         COPY --from=gcr.io/cloud-sql-connectors/cloud-sql-proxy /cloud-sql-proxy /cloudsql/cloud-sql-proxy" > Dockerfile-proxy;
         docker build -f Dockerfile-proxy -t $_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA-proxy .
   # For Unix Socket connections
-  - id: migrate-socket
+  - id: create-proxy
     name: "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA-proxy"
     env:
       - DATABASE_NAME=$_DATABASE_NAME
@@ -77,8 +77,9 @@ steps:
       - DATABASE_PASS=$_DATABASE_PASSWORD
     entrypoint:  sh
     args:
-      - /cloudsql/cloud-sql-proxy
-      - -instances=$_INSTANCE_CONNECTION_NAME=tcp:3306
+      - '-c'
+      - |
+        /cloudsql/cloud-sql-proxy -instances=$_INSTANCE_CONNECTION_NAME=tcp:3306
   # Run Migration
   - id: migration-database
     name: node:16-alpine
