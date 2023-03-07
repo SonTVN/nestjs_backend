@@ -22,7 +22,7 @@ steps:
       - run
       - create-env
     env:
-      - DATABASE_URL='$_DATABASE_DRIVER://$_DATABASE_USER:$_DATABASE_PASSWORD@$_DATABASE_HOST/$_DATABASE_NAME?socket=/cloudsql/$_DATABASE_SERVER'
+      - DATABASE_URL='$_DATABASE_TYPE://$_DATABASE_USER:$_DATABASE_PASSWORD@$_DATABASE_HOST/$_DATABASE_NAME?socket=/cloudsql/$_INSTANCE_CONNECTION_NAME'
     id: Env
   # Build Image from Dockerfile
   - name: gcr.io/cloud-builders/docker
@@ -55,6 +55,20 @@ steps:
       - '--quiet'
     id: Deploy
     entrypoint: gcloud
+  # For Unix Socket connections
+  - id: "migrate-socket"
+    env:
+      - DATABASE_NAME=$_DATABASE_NAME
+      - DATABASE_USER=$_DATABASE_USER
+      - INSTANCE_CONNECTION_NAME=$_INSTANCE_CONNECTION_NAME
+      - DATABASE_TYPE=$_DATABASE_TYPE
+      - DATABASE_PASS=$_DATABASE_PASSWORD
+    entrypoint: /bin/bash
+    args:
+      - '-c'
+      - |
+        /cloudsql/cloud-sql-proxy --unix-socket /cloudsql ${_INSTANCE_CONNECTION_NAME} & sleep 2;
+        if [ $_DATABASE_TYPE = 'mssql' ]; then echo "MSSQL doesn't support Unix Sockets. Skippng."; exit 0; fi;
   # Run Migration
   - name: node:16-alpine
     dir: backend
