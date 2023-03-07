@@ -79,8 +79,7 @@ steps:
     args:
       - '-c'
       - |
-        /cloudsql/cloud-sql-proxy --unix-socket /cloudsql ${_INSTANCE_CONNECTION_NAME} & sleep 2;
-        if [ $_DATABASE_TYPE = 'mssql' ]; then echo "MSSQL doesn't support Unix Sockets. Skippng."; exit 0; fi;
+        /cloudsql/cloud-sql-proxy -instances=$_INSTANCE_CONNECTION_NAME=tcp:3306
   # Run Migration
   - id: migration-database
     name: node:16-alpine
