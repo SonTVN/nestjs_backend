@@ -14,7 +14,7 @@ COPY ./backend /app/
 # RUN npx prisma generate
 
 # Build production
-# RUN npm run build
+RUN npm run build
 
 # Run app in port 3000
 EXPOSE 3000
