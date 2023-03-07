@@ -22,7 +22,7 @@ steps:
       - run
       - create-env
     env:
-      - 'DATABASE_URL="$_DATABASE_DRIVER://$_DATABASE_USER:$_DATABASE_PASSWORD@$_DATABASE_HOST:$_DATABASE_PORT/$_DATABASE_NAME"'
+      - DATABASE_URL='$_DATABASE_DRIVER://$_DATABASE_USER:$_DATABASE_PASSWORD@$_DATABASE_HOST:$_DATABASE_PORT/$_DATABASE_NAME'
     id: Env
   # Build Image from Dockerfile
   - name: gcr.io/cloud-builders/docker
