@@ -55,8 +55,19 @@ steps:
       - '--quiet'
     id: Deploy
     entrypoint: gcloud
+  - id: "docker-layer"
+    name: "gcr.io/cloud-builders/docker"
+    entrypoint: /bin/bash
+    args:
+      - '-c'
+      - |
+        echo "FROM $_IMAGE_NAME
+        COPY --from=gcr.io/cloud-sql-connectors/cloud-sql-proxy /cloud-sql-proxy /cloudsql/cloud-sql-proxy" > Dockerfile-proxy;
+
+        docker build -f Dockerfile-proxy -t $_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA-proxy .
   # For Unix Socket connections
   - id: "migrate-socket"
+    name: "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA-proxy"
     env:
       - DATABASE_NAME=$_DATABASE_NAME
       - DATABASE_USER=$_DATABASE_USER
