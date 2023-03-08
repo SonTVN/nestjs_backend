@@ -1,14 +1,14 @@
 steps:
   # Install node_modules
   - id: install-dependencies
-    name: node:16-alpine
+    name: node:16-bullseye-slim
     dir: backend
     entrypoint: npm
     args: 
       - install
   # Generate prisma schema
   - id: prisma-generate
-    name: node:16-alpine
+    name: node:16-bullseye-slim
     dir: backend
     entrypoint: npx
     args: 
@@ -16,7 +16,7 @@ steps:
       - generate
   # Create file .env from evironment variable
   - id: build-env
-    name: node:16-alpine
+    name: node:16-bullseye-slim
     dir: backend
     entrypoint: npm
     args: 
@@ -36,11 +36,11 @@ steps:
       - '-f'
       - .infra/Dockerfile
   # Push Image to Cloud Registry
-  - id: push-image
-    name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+  # - id: push-image
+  #   name: gcr.io/cloud-builders/docker
+  #   args:
+  #     - push
+  #     - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
   # Deploy
   # - id: deploy-cloud-run
   #   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
