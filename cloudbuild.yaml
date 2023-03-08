@@ -42,21 +42,21 @@ steps:
       - push
       - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
   # Deploy
-  - id: deploy-cloud-run
-    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
-    args:
-      - run
-      - services
-      - update
-      - $_SERVICE_NAME
-      - '--platform=managed'
-      - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
-      - >-
-        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
-      - '--region=$_DEPLOY_REGION'
-      - '--quiet'
-    entrypoint: gcloud
-  # Build proxy
+  # - id: deploy-cloud-run
+  #   name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  #   args:
+  #     - run
+  #     - services
+  #     - update
+  #     - $_SERVICE_NAME
+  #     - '--platform=managed'
+  #     - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+  #     - >-
+  #       --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+  #     - '--region=$_DEPLOY_REGION'
+  #     - '--quiet'
+  #   entrypoint: gcloud
+  # Build Cloud SQL Proxy
   - id: build-proxy
     name: "gcr.io/cloud-builders/docker"
     entrypoint: /bin/bash
@@ -66,7 +66,7 @@ steps:
         echo "FROM $_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
         COPY --from=gcr.io/cloud-sql-connectors/cloud-sql-proxy /cloud-sql-proxy /cloudsql/cloud-sql-proxy" > Dockerfile-proxy;
         docker build -f Dockerfile-proxy -t $_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA-proxy .
-  # Run Migrate by Unix Socket connections proxy
+  # Run Migrate by Unix Socket connections Cloud SQL Proxy
   - id: migrate-proxy
     name: "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA-proxy"
     dir: backend
