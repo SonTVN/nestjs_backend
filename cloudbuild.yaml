@@ -58,7 +58,7 @@ steps:
       - '--max-instances=$_CLOUDRUN_MAX_INSTANCE'
       - '--cpu=$_CLOUDRUN_CPU'
       - '--$_CLOUDRUN_CPU_ALLOCATED'
-      - '--$_CLOUDRUN_CPU_BOOST'
+      # - '--$_CLOUDRUN_CPU_BOOST'
       - '--memory=_CLOUDRUN_MEMORY'
       - '--add-cloudsql-instances=$_INSTANCE_CONNECTION_NAME'
       - '--allow-unauthenticated'
