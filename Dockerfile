@@ -21,4 +21,5 @@ RUN npm run build
 
 # Run app in port 3000
 EXPOSE 3000
+ENV PORT 3000
 CMD node dist/main.js
