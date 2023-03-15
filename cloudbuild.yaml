@@ -1,19 +1,4 @@
 steps:
-  # Install node_modules
-  - id: install-dependencies
-    name: node:16-alpine
-    dir: backend
-    entrypoint: npm
-    args: 
-      - install
-  # Generate prisma schema
-  - id: prisma-generate
-    name: node:16-alpine
-    dir: backend
-    entrypoint: npx
-    args: 
-      - prisma
-      - generate
   # Create file .env from evironment variable
   - id: build-env
     name: node:16-alpine

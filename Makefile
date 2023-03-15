@@ -6,6 +6,7 @@ _PROJECT_NUMBER=$(shell gcloud projects describe ${_PROJECT_ID} --format='value(
 _DB_INSTANCE_ID=${_SERVICE_NAME}-${_ENV}-sql
 _TRIGGER_INSTANCE_ID=${_SERVICE_NAME}-${_ENV}-trigger
 _INSTANCE_CONNECTION_NAME=${_PROJECT_ID}:${_DB_REGION}:${_DB_INSTANCE_ID}
+_IMAGE=${_GCR_HOSTNAME}/${_PROJECT_ID}/${_GITHUB_PROJECT}/${_SERVICE_NAME}:${_ENV}
 
 enable-api:
 	@gcloud services enable \
@@ -60,6 +61,33 @@ cloudsql-create:
 		--host=% \
 		--async
 	@echo "Success created database users: ${_DATABASE_USER}"
+
+build-image:
+	@docker build --no-cache -t ${_IMAGE} . -f .infra/Dockerfile
+	@echo "Success build image: ${_IMAGE}"
+
+push-image:
+	@docker push ${_IMAGE}
+	@echo "Success push image: ${_IMAGE}"
+
+cloudrun-create:
+	@gcloud beta run deploy ${_SERVICE_NAME} \
+		--platform=managed \
+		--image=${_GCR_HOSTNAME}/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+		--port=$_CLOUDRUN_PORT \
+		--$_CLOUDRUN_USE_HTTP2 \
+		-labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger=$TRIGGER_NAME \
+		--region=$_DEPLOY_REGION \
+		--min-instances=$_CLOUDRUN_MIN_INSTANCE \
+		--max-instances=$_CLOUDRUN_MAX_INSTANCE \
+		--cpu=$_CLOUDRUN_CPU \
+		--$_CLOUDRUN_CPU_ALLOCATED \
+		--$_CLOUDRUN_CPU_BOOST \
+		--memory=$_CLOUDRUN_MEMORY \
+		--add-cloudsql-instances=$_INSTANCE_CONNECTION_NAME \
+		--allow-unauthenticated \
+		--async
+	@echo "Success created cloudrun: ${_SERVICE_NAME}"
 
 trigger-init:
 	@rm -f ${_TRIGGER_INSTANCE_ID}.json
