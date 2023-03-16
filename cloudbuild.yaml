@@ -8,7 +8,7 @@ steps:
       - run
       - create-env
     env:
-      - DATABASE_URL='$_DATABASE_TYPE://$_DATABASE_USER:$_DATABASE_PASSWORD@$_DATABASE_HOST:$_DATABASE_PORT/$_DATABASE_NAME?socket=/cloudsql/$_INSTANCE_CONNECTION_NAME'
+      - DATABASE_URL='$_DATABASE_URL?socket=/cloudsql/$_INSTANCE_CONNECTION_NAME'
   # Build Image from Dockerfile
   - id: build-image
     name: gcr.io/cloud-builders/docker
@@ -16,7 +16,7 @@ steps:
       - build
       - '--no-cache'
       - '-t'
-      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_PROJECT-$_ENV-$_SERVICE:$COMMIT_SHA'
       - .
       - '-f'
       - .infra/Dockerfile
@@ -25,7 +25,7 @@ steps:
     name: gcr.io/cloud-builders/docker
     args:
       - push
-      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_PROJECT-$_ENV-$_SERVICE:$COMMIT_SHA'
   # Deploy
   - id: deploy-cloud-run
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
@@ -35,9 +35,9 @@ steps:
       - run
       - services
       - update
-      - $_SERVICE_NAME
+      - $_CLOUDRUN_NAME
       - '--platform=managed'
-      - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+      - '--image=$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_PROJECT-$_ENV-$_SERVICE:$COMMIT_SHA'
       - '--port=$_CLOUDRUN_PORT'
       - '--$_CLOUDRUN_USE_HTTP2'
       - >-
@@ -59,12 +59,12 @@ steps:
     args:
       - '-c'
       - |
-        echo "FROM $_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+        echo "FROM $_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_PROJECT-$_ENV-$_SERVICE:$COMMIT_SHA
         COPY --from=gcr.io/cloud-sql-connectors/cloud-sql-proxy /cloud-sql-proxy /cloudsql/cloud-sql-proxy" > Dockerfile-proxy;
-        docker build -f Dockerfile-proxy -t $_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA-proxy .
+        docker build -f Dockerfile-proxy -t $_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_PROJECT-$_ENV-$_SERVICE:$COMMIT_SHA-proxy .
   # Run Migrate by Unix Socket connections Cloud SQL Proxy
   - id: migrate-proxy
-    name: "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA-proxy"
+    name: "$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_PROJECT-$_ENV-$_SERVICE:$COMMIT_SHA-proxy"
     dir: backend
     env:
       - DATABASE_NAME=$_DATABASE_NAME
@@ -80,12 +80,12 @@ steps:
         if [ $_DATABASE_TYPE = 'mssql' ]; then echo "MSSQL doesn't support Unix Sockets. Skippng."; exit 0; fi;
         npx prisma migrate deploy
 images:
-  - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA'
+  - '$_GCR_HOSTNAME/$PROJECT_ID/$REPO_NAME/$_PROJECT-$_ENV-$_SERVICE:$COMMIT_SHA'
 options:
   substitutionOption: ALLOW_LOOSE
 substitutions:
   _PLATFORM: managed
-  _SERVICE_NAME: nestjs-backend
+  _SERVICE_NAME: service-name
   _DEPLOY_REGION: asia-northeast1
   _GCR_HOSTNAME: us.gcr.io
 tags:

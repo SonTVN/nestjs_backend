@@ -9,7 +9,7 @@
   },
 
   "name": "_TRIGGER_NAME",
-  "description": "Trigger dev build/deploy for branch _GITHUB_BRANCH",
+  "description": "Trigger build/deploy for branch _GITHUB_BRANCH",
   "filename": "cloudbuild.yaml",
   "includeBuildLogs": "INCLUDE_BUILD_LOGS_WITH_STATUS",
 
